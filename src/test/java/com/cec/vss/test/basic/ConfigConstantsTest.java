@@ -37,7 +37,8 @@ public class ConfigConstantsTest {
 				"API_HOST",
 				"API_PORT",
 				"API_PATH",
-				"API_AUTH_PARAM"
+				"API_AUTH_PARAM",
+				"TEST_PROP"
 		));
 
 		Field fields[] = ConfigConstants.class.getDeclaredFields();
