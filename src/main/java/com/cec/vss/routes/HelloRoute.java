@@ -4,58 +4,65 @@ import java.util.Properties;
 
 import com.cec.vss.config.ConfigConstants;
 import com.cec.vss.config.Configurator;
+import com.cec.vss.handlers.BasicEndHandler;
+import com.cec.vss.handlers.GenericWebHandler;
 
 import io.vertx.core.http.HttpClient;
 import io.vertx.core.http.HttpClientRequest;
-import io.vertx.core.http.HttpServerResponse;
 import io.vertx.core.streams.Pump;
 import io.vertx.ext.web.Route;
 import io.vertx.ext.web.Router;
+import io.vertx.ext.web.RoutingContext;
 
-public final class HelloRoute{
+public final class HelloRoute {
 
-	//private static final Logger LOGGER = Logger.getLogger(HelloRoute.class.getName());
+  private static final String ROUTE_PATH = "/hello";
 
-	private static final String ROUTE_PATH = "/hello";
+  private HelloRoute() {
+    super();
+  }
 
-	private HelloRoute(){
-		super();
-	}
+  public static final Route addInterestRoute(Router router, HttpClient httpClient) {
 
-	public static final Route addInterestRoute(Router router, HttpClient httpClient){
+    return router.route(ROUTE_PATH).handler(new HelloHandler(httpClient));
 
-		return router.route(ROUTE_PATH).handler(routingContext -> {
+  }
 
-			Properties config = Configurator.getThreadsafeConfig();
+}
 
-			HttpServerResponse response = routingContext.response();
+class HelloHandler extends GenericWebHandler {
 
-			response.setChunked(true);
+  private HttpClient httpClient;
 
-			HttpClientRequest serviceRequest = httpClient.get(8080, "localhost", "/hello.html", clientResp -> {
+  public HelloHandler(HttpClient httpClient) {
+    this.httpClient = httpClient;
+  }
 
-				response.putHeader("content-type", clientResp.getHeader("content-type"));
+  @Override
+  public void handle(RoutingContext context) {
 
-				clientResp.endHandler(endHandler ->{
-					response.end();
-				});
+    super.handle(context);
 
-				response.write(config.getProperty(ConfigConstants.TEST_PROP) + " ");
+    HttpClientRequest serviceRequest = httpClient.get(8080, "localhost", "/hello.html", clientResp -> {
 
-				Pump.pump(clientResp, response).start();
+      Properties config = Configurator.getThreadsafeConfig();
+      response.putHeader("content-type", clientResp.getHeader("content-type"));
 
-			});
+      clientResp.endHandler(new BasicEndHandler(response));
 
-			serviceRequest.exceptionHandler(e -> {
-				System.out.println("Received exception: " + e.getMessage());
-				e.printStackTrace();
-				response.end();
-			});
+      response.write(config.getProperty(ConfigConstants.TEST_PROP) + " ");
 
-			serviceRequest.end();
+      Pump.pump(clientResp, response).start();
 
-		});
+    });
 
-	}
+    serviceRequest.exceptionHandler(e -> {
+      System.out.println("Received exception: " + e.getMessage());
+      e.printStackTrace();
+      response.end();
+    });
 
+    serviceRequest.end();
+
+  }
 }
