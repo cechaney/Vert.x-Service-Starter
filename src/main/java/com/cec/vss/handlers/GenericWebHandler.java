@@ -5,6 +5,11 @@ import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.http.HttpServerResponse;
 import io.vertx.ext.web.RoutingContext;
 
+/**
+ * 
+ * @author josephspear
+ * put the basic stuff that all req/resp cycles would want to use
+ */
 public class GenericWebHandler implements Handler<RoutingContext> {
 
   protected HttpServerRequest request;
