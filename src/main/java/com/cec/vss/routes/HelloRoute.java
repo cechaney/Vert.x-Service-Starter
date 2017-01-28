@@ -5,6 +5,7 @@ import java.util.Properties;
 import com.cec.vss.config.ConfigConstants;
 import com.cec.vss.config.Configurator;
 import com.cec.vss.handlers.BasicEndHandler;
+import com.cec.vss.handlers.BasicWebErrorHandler;
 import com.cec.vss.handlers.GenericWebHandler;
 
 import io.vertx.core.http.HttpClient;
@@ -56,11 +57,7 @@ class HelloHandler extends GenericWebHandler {
 
     });
 
-    serviceRequest.exceptionHandler(e -> {
-      System.out.println("Received exception: " + e.getMessage());
-      e.printStackTrace();
-      response.end();
-    });
+    serviceRequest.exceptionHandler(new BasicWebErrorHandler(response));
 
     serviceRequest.end();
 
